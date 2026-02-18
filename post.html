@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=no">
-    <title>추첨 결과 확인</title>
+    <title>셀렌 수로 이벤트 추첨</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="icon" href="assets/Selen.png" type="image/x-icon">
     <style>
@@ -13,10 +13,23 @@
                 font-size: 1.5rem; font-weight: bold; background: white; }
         .winner-display { animation: bounce 0.5s infinite alternate; color: #ff4757; }
         @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            /* 화면 전체 높이를 차지하여 중앙 정렬의 기준 마련 */
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 수직 중앙 정렬 */
+            align-items: center;     /* 수평 중앙 정렬 */
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
     </style>
 </head>
 <body>
-    <header><h1>🎉 행운의 당첨자 🎉</h1></header>
+    <header><h1>🎉 셀렌 수로 이벤트 추첨 🎉</h1></header>
     <div class="slot-container">
         <div class="slot">
             <div id="slot1-rail" class="slot-rail">
