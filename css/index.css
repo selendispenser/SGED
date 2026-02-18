@@ -350,3 +350,30 @@ input, textarea {
 button, .add-btn, .delete-btn, .secondary-btn, .primary-btn, .member-item {
     cursor: pointer;
 }
+/* 기본 슬롯 컨테이너 (PC 버전: 가로 배치) */
+.slot-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 📱 모바일 환경 (화면 너비 768px 이하) */
+@media screen and (max-width: 768px) {
+    .slot-container {
+        flex-direction: column; /* 세로 배치로 변경 */
+        gap: 30px; /* 위아래 간격 확대 */
+    }
+
+    .slot {
+        width: 85vw; /* 화면 너비의 85%까지 확대 */
+        height: 120px; /* 높이도 키워 시인성 확보 */
+        border-width: 6px; /* 테두리 강조 */
+    }
+
+    .name-item {
+        height: 120px; /* .slot 높이와 일치시켜 중앙 정렬 유지 */
+        font-size: 2.2rem; /* 글자 크기 대폭 확대 */
+    }
+}
