@@ -42,7 +42,50 @@
             font-weight: bold;
             color: #444;
         }
+        .participant-section {
+            width: 90%;
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+        }
 
+        .participant-section h3 {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .participant-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .participant-badge {
+            background: #eee;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* 당첨자는 명단에서도 강조 */
+        .participant-badge.is-winner {
+            background: #ff4757;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 768px) {
+            .participant-badge {
+                font-size: 1rem;
+                padding: 4px 10px;
+            }
+        }
         .reward-footer span {
             color: #ff4757; /* 강조색 */
             font-size: 1.3rem;
@@ -63,6 +106,11 @@
             </div>
         </div>
     </div>
+    <section class="participant-section">
+        <h3>📢 참여해주신 분들</h3>
+        <div id="participant-list" class="participant-grid">
+            </div>
+    </section>
     <footer class="reward-footer">
         <p>🎁 당첨 보상 : <span>솔 에르다 조각 3개</span></p>
     </footer>
