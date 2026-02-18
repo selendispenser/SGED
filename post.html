@@ -28,14 +28,19 @@
             overflow-x: hidden;
         }
         .reward-footer {
-            padding: 20px 0px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            border: 2px solid #eee;
-            animation: fadeIn 1s ease-in-out; /* 부드럽게 나타나는 효과 */
-            bottom: 0;
             position: fixed;
+            bottom: 0;           /* 화면 맨 바닥에 밀착 */
+            left: 0;
+            width: 100%;         /* 좌우 꽉 차게 설정 */
+            
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.95); /* 가독성을 위한 불투명 배경 */
+            backdrop-filter: blur(10px);           /* 세련된 배경 흐림 효과 */
+            border-top: 1px solid #eee;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05); /* 위쪽으로 은은한 그림자 */
+            
+            text-align: center;
+            z-index: 1000;
         }
 
         .reward-footer p {
