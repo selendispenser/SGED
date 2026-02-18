@@ -34,22 +34,19 @@ export function shareToKakao(stateMembers) {
     if (!window.Kakao) return;
 
     const checkedNames = stateMembers.filter(m => m.checked).map(m => m.name);
-    if (checkedNames.length < 2) {
-        alert("추첨을 위해 최소 2명을 선택해 주세요.");
-        return;
-    }
+    if (checkedNames.length < 2) return alert("추첨 인원이 부족합니다.");
 
     const shuffled = [...checkedNames].sort(() => 0.5 - Math.random());
     const [winner1, winner2] = shuffled.slice(0, 2);
 
-    // ✅ 현재 접속 중인 도메인을 자동으로 파악하여 경로 생성
-    const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+    // ✅ GitHub Pages 경로(서브디렉토리)에 완벽 대응하는 주소 생성
+    const baseUrl = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/') + '/';
     const shareUrl = `${baseUrl}post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}`;
 
     Kakao.Share.sendCustom({
         templateId: 129560,
         templateArgs: {
-            'url': shareUrl, // 템플릿 빌더에 설정한 ${url} 자리에 들어갑니다.
+            'url': shareUrl, // 템플릿의 ${url} 자리에 이 전체 주소가 들어갑니다.
             'title': '💎 Selen 길드 수로 추첨 결과',
             'desc': `총 ${checkedNames.length}명이 참여했습니다!`
         },
