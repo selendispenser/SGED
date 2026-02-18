@@ -62,7 +62,7 @@ export function shareToKakao(stateMembers) {
             'url': relativePath,
             'p': participantsStr,
             'title': '💎 Selen 길드 수로 추첨 결과',
-            'desc': `총 ${checkedMembers.length}명이 참여했습니다!`
+            'desc': `총 ${checkedNames.length}명이 참여했습니다!`
         },
     });
 }
