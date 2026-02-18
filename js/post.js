@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function startSlotSlide(railId, winner, namePool) {
     const rail = document.getElementById(railId);
-    const itemHeight = 80; // CSS의 .name-item 높이와 반드시 일치해야 함
+    const slotElement = rail.parentElement;
+    const itemHeight = slotElement.offsetHeight;
 
     // 1. 가짜 리스트 생성 (30개 정도)
     const displayList = [];
@@ -32,7 +33,7 @@ function startSlotSlide(railId, winner, namePool) {
     // 2. HTML 생성 (마지막 요소에만 클래스를 넣기 쉽게 id 부여 가능)
     rail.innerHTML = displayList.map((name, index) => {
         const isLast = index === displayList.length - 1;
-        return `<div class="name-item ${isLast ? 'target-winner' : ''}">${name}</div>`;
+        return `<div class="name-item ${isLast ? 'target-winner' : ''}" style="height: ${itemHeight}px;">${name}</div>`;
     }).join('');
 
     // 3. 애니메이션 완료 후 하이라이트 실행 (transitionend 이벤트 활용)
