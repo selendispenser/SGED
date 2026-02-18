@@ -39,14 +39,14 @@ export function shareToKakao(stateMembers) {
     const shuffled = [...checkedNames].sort(() => 0.5 - Math.random());
     const [winner1, winner2] = shuffled.slice(0, 2);
 
-    // ✅ GitHub Pages 경로(서브디렉토리)에 완벽 대응하는 주소 생성
-    const baseUrl = window.location.origin + window.location.pathname.split('/').slice(0, -1).join('/') + '/';
-    const shareUrl = `${baseUrl}post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}`;
+    const currentPath = window.location.pathname;
+    const dirPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+    const relativePath = `${dirPath}/post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}`;
 
     Kakao.Share.sendCustom({
         templateId: 129560,
         templateArgs: {
-            'url': shareUrl, // 템플릿의 ${url} 자리에 이 전체 주소가 들어갑니다.
+            'url': relativePath, // 이제 전체 주소가 아닌 상대 경로만 보냅니다. [cite: 2026-02-12]
             'title': '💎 Selen 길드 수로 추첨 결과',
             'desc': `총 ${checkedNames.length}명이 참여했습니다!`
         },
