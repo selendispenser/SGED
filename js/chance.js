@@ -33,18 +33,24 @@ export function drawWinner() {
 export function shareToKakao(stateMembers) {
     if (!window.Kakao) return;
 
-    // 1. 체크된 인원만 필터링
-    const checkedMembers = stateMembers.filter(m => m.checked).map(m => m.name);
-    if (checkedMembers.length < 2) return alert("추첨 인원이 부족합니다.");
+    // 1. 체크된 멤버 이름만 추출
+    const checkedNames = stateMembers.filter(m => m.checked).map(m => m.name);
+    
+    if (checkedNames.length < 2) {
+        alert("추첨 인원이 부족합니다.");
+        return;
+    }
 
     // 2. 당첨자 추첨
-    const shuffled = [...checkedMembers].sort(() => 0.5 - Math.random());
+    const shuffled = [...checkedNames].sort(() => 0.5 - Math.random());
     const [winner1, winner2] = shuffled.slice(0, 2);
 
-    // 3. 전체 참여자 명단을 문자열로 변환 (예: "홍길동,김철수,이영희")
-    const participantsStr = checkedMembers.join(',');
+    // 3. 참여자 명단 생성 (쉼표로 구분)
+    // 여기서 console.log를 찍어 데이터가 제대로 생성되는지 확인해보세요.
+    const participantsStr = checkedNames.join(',');
+    console.log("전달될 명단:", participantsStr); 
 
-    // 4. 경로 생성 (도메인 제외 상대 경로)
+    // 4. 경로 생성 (상대 경로 방식)
     const currentPath = window.location.pathname;
     const dirPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
     
