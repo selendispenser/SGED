@@ -33,22 +33,30 @@ export function drawWinner() {
 export function shareToKakao(stateMembers) {
     if (!window.Kakao) return;
 
-    const checkedNames = stateMembers.filter(m => m.checked).map(m => m.name);
-    if (checkedNames.length < 2) return alert("추첨 인원이 부족합니다.");
+    // 1. 체크된 인원만 필터링
+    const checkedMembers = stateMembers.filter(m => m.checked).map(m => m.name);
+    if (checkedMembers.length < 2) return alert("추첨 인원이 부족합니다.");
 
-    const shuffled = [...checkedNames].sort(() => 0.5 - Math.random());
+    // 2. 당첨자 추첨
+    const shuffled = [...checkedMembers].sort(() => 0.5 - Math.random());
     const [winner1, winner2] = shuffled.slice(0, 2);
 
+    // 3. 전체 참여자 명단을 문자열로 변환 (예: "홍길동,김철수,이영희")
+    const participantsStr = checkedMembers.join(',');
+
+    // 4. 경로 생성 (도메인 제외 상대 경로)
     const currentPath = window.location.pathname;
     const dirPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-    const relativePath = `${dirPath}/post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}`;
+    
+    // 파라미터에 p=참여자명단 추가
+    const relativePath = `${dirPath}/post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}&p=${encodeURIComponent(participantsStr)}`;
 
     Kakao.Share.sendCustom({
         templateId: 129560,
         templateArgs: {
-            'url': relativePath, // 이제 전체 주소가 아닌 상대 경로만 보냅니다. [cite: 2026-02-12]
+            'url': relativePath,
             'title': '💎 Selen 길드 수로 추첨 결과',
-            'desc': `총 ${checkedNames.length}명이 참여했습니다!`
+            'desc': `총 ${checkedMembers.length}명이 참여했습니다!`
         },
     });
 }

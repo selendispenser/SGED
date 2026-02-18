@@ -1,22 +1,34 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const winners = [params.get('w1'), params.get('w2')];
+    const participantsRaw = params.get('p'); // 참여자 명단 파라미터
 
-    if (!winners[0]) return alert("잘못된 접근입니다.");
+    if (!winners[0] || !participantsRaw) {
+        alert("잘못된 접근입니다. 메인 페이지를 통해 공유해 주세요.");
+        return;
+    }
 
-    try {
-        const response = await fetch('./assets/soldier.json');
-        const soldiers = await response.json();
-        const names = soldiers.map(s => s.name);
+    // 쉼표로 구분된 참여자 명단을 배열로 변환
+    const participants = participantsRaw.split(',');
 
-        // 슬라이드 실행
-        startSlotSlide("slot1-rail", winners[0], names);
-        setTimeout(() => {
-            startSlotSlide("slot2-rail", winners[1], names);
-        }, 800); // 0.8초 시차
+    // 1. 참여자 명단 하단에 렌더링
+    renderParticipantList(participants, winners);
 
-    } catch (e) { console.error(e); }
+    // 2. 슬롯 애니메이션 실행 (참여자 명단을 애니메이션 소스로 활용하여 몰입감 증대)
+    startSlotSlide("slot1-rail", winners[0], participants);
+    setTimeout(() => {
+        startSlotSlide("slot2-rail", winners[1], participants);
+    }, 800);
 });
+function renderParticipantList(names, winners) {
+    const container = document.getElementById('participant-list');
+    if (!container) return;
+
+    container.innerHTML = names.map(name => {
+        const isWinner = winners.includes(name);
+        return `<span class="participant-badge ${isWinner ? 'is-winner' : ''}">${name}</span>`;
+    }).join('');
+}
 
 function startSlotSlide(railId, winner, namePool) {
     const rail = document.getElementById(railId);
