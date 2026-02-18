@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selen 길드 관리 도구</title>
+    <script 
+        src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.0/kakao.min.js" 
+        integrity="sha384-l+xbElFSnPZ2rOaPrU//2FF5B4LB8FiX5q4fXYTlfcG4PGpMkE1vcL7kNXI6Cci0" 
+        crossorigin="anonymous">
+    </script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" href="assets/Selen.png" type="image/x-icon">
+</head>
+<body>
+
+    <div id="app">
+        <header>
+            <h1>Selen 수로 참여 체크</h1>
+            <p id="counter">선택된 인원: 0명</p>
+            <p id="date">2026.02.19 기준</p>
+        </header>
+
+        <section class="controls">
+            <div class="add-container">
+                <input type="text" id="memberInput" class="search-input" placeholder="추가할 길드원 이름 입력...">
+                <button id="btnAddMember" class="add-btn">추가</button>
+            </div>
+            <div class="filter-buttons">
+                <button id="btnLoadSoldiers" class="secondary-btn">길드원 불러오기</button>
+                <button id="btnSelectAll" class="secondary-btn">전체 선택</button>
+                <button id="btnReset" class="secondary-btn">전체 해제</button>
+            </div>
+        </section>
+
+        <main class="list-container">
+            <ul id="memberList" class="member-list">
+                <li class="loading-state">데이터를 불러오는 중입니다...</li>
+            </ul>
+        </main>
+
+        <footer class="action-bar">
+            <button id="btnSendKakao" class="primary-btn">
+                <span>카카오톡으로 결과 공유</span>
+            </button>
+        </footer>
+    </div>
+
+    <script src="js/script.js" type="module"></script>
+    <script src="js/chance.js" type="module"></script>
+    <script src="js/render.js" type="module"></script>
+</body>
+</html>

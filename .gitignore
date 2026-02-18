@@ -1,0 +1,9 @@
+# node.js 관련 임시파일 및 의존성
+node_moduiles/
+npm-debug.log*
+yarn-error.log*
+yarn-error.log*
+
+# serve 관련 설정
+.DS-Store
+.env

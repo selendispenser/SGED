@@ -1,0 +1,352 @@
+/* 1. Reset & Global Variables */
+:root {
+    --primary-color: #4A90E2;
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-main: #333333;
+    --text-sub: #666666;
+    --border-color: #dddddd;
+    --accent-color: #ff4757;
+    --kakao-color: #FEE500;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-bottom: 120px; /* action-bar 높이만큼 여유 공간 확보 */
+}
+
+/* 2. Header Section */
+header {
+    width: 100%;
+    max-width: 1000px;
+    padding: 3rem 1rem 1.5rem;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    width: 100%;
+}
+
+#counter {
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    display: block;
+    width: 100%;
+}
+#date {
+    font-size: 1rem;
+    font-weight: 600;
+    display: block;
+    width: 100%;
+}
+
+/* 3. Controls Section (Add & Filter) */
+.controls {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.add-container {
+    display: flex;
+    gap: 10px;
+    margin: 1.5rem 0 1rem;
+    width: 100%;
+    max-width: 600px;
+    justify-content: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    outline: none;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+}
+
+.add-btn {
+    padding: 0 25px;
+    height: 46px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.add-btn:hover {
+    background-color: var(--primary-color);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+}
+
+.secondary-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.secondary-btn:hover {
+    background: #f8f9fa;
+    border-color: var(--text-sub);
+}
+
+/* 4. Main List Section */
+.list-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.member-list {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    list-style: none;
+}
+
+.member-item {
+    background: var(--card-bg);
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    width: calc(50% - 12px);
+    min-width: 280px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.member-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 0;
+}
+
+.member-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.name-text {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 1.6rem;
+    font-weight: 300; /* × 기호를 조금 더 얇고 세련되게 */
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.delete-btn:hover {
+    transform: scale(1.3);
+}
+
+.loading-state {
+    padding: 3rem;
+    color: var(--text-sub);
+    font-style: italic;
+}
+
+/* 5. Footer Action Bar */
+.action-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, var(--bg-color) 80%, transparent);
+    display: flex;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.primary-btn {
+    width: 100%;
+    max-width: 560px;
+    border: none;
+    background: var(--kakao-color);
+    color: #3C1E1E;
+    padding: 18px;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:active {
+    transform: scale(0.98);
+}
+
+/* 6. Responsive Adjustments */
+@media (max-width: 768px) {
+    .member-item {
+        width: 100%; /* 모바일에서는 한 줄로 */
+    }
+}
+
+.winner-display {
+    color: var(--accent-color) !important;
+    background-color: #fff9f9 !important;
+    border-color: var(--accent-color) !important;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
+    transition: all 0.3s ease-out;
+}
+
+/* 슬롯 상자 고정 */
+.slot {
+    width: 220px;
+    height: 80px; /* 한 명의 이름만 보일 높이 */
+    border: 4px solid #333;
+    border-radius: 15px;
+    overflow: hidden; /* 영역 밖 이름 숨김 */
+    background: white;
+    position: relative;
+}
+
+/* 이름들이 나열된 긴 막대 */
+.slot-rail {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transition: transform 3s cubic-bezier(0.1, 0, 0.1, 1); /* 부드럽게 멈추는 효과 */
+}
+
+.name-item {
+    height: 80px; /* .slot 높이와 일치 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* 당첨자 아이템 전용 스타일 */
+.name-item.winner-display {
+    color: #ea47ff !important; /* var(--accent-color) */
+    background-color: #fff9f9;
+    font-size: 1.8rem; /* 살짝 더 커짐 */
+    transition: all 0.5s ease-out;
+    animation: celebrate 0.5s ease-in-out infinite alternate;
+}
+
+/* 당첨 시 반짝이는 애니메이션 추가 */
+@keyframes celebrate {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.1); filter: brightness(1.2); }
+}
+
+/* 부모 슬롯에 당첨 시 보더 색상 변경 효과를 주려면 */
+.slot.finished {
+    border-color: #ea47ff;
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+}
+
+/* 사이트 전체 텍스트 선택 및 드래그 방지 */
+*, *::before, *::after {
+    -webkit-user-select: none;  /* Safari, Chrome */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* IE/Edge */
+    user-select: none;          /* 표준 속성 */
+    
+    /* 모바일에서 길게 터치 시 돋보기나 복사 메뉴 방지 */
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;    /* 이미지 드래그 방지 */
+}
+
+/* 입력창(input)은 예외적으로 텍스트 입력 및 선택이 가능해야 함 */
+input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    cursor: text;
+}
+
+/* 추가 버튼이나 삭제 버튼 등 클릭 가능한 요소들 */
+button, .add-btn, .delete-btn, .secondary-btn, .primary-btn, .member-item {
+    cursor: pointer;
+}
