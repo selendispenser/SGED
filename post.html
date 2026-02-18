@@ -26,6 +26,27 @@
             background-color: #f8f9fa;
             overflow-x: hidden;
         }
+        .reward-footer {
+            margin-top: 50px; /* 슬롯과의 간격 */
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #eee;
+            animation: fadeIn 1s ease-in-out; /* 부드럽게 나타나는 효과 */
+        }
+
+        .reward-footer p {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .reward-footer span {
+            color: #ff4757; /* 강조색 */
+            font-size: 1.4rem;
+        }
     </style>
 </head>
 <body>
@@ -42,6 +63,9 @@
             </div>
         </div>
     </div>
+    <footer class="reward-footer">
+        <p>🎁 당첨 보상 : <span>솔 에르다 조각 3개</span></p>
+    </footer>
     <script src="js/post.js" type="module"></script>
 </body>
 </html>
