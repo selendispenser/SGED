@@ -27,20 +27,37 @@
             background-color: #f8f9fa;
             overflow-x: hidden;
         }
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* 푸터의 높이 + 여유공간 20px 만큼 바닥 여백을 강제합니다 */
+            padding-bottom: 120px !important; 
+            width: 100%;
+            box-sizing: border-box;
+        }
         .reward-footer {
             position: fixed;
-            bottom: 0;           /* 화면 맨 바닥에 밀착 */
-            left: 0;
-            width: 100%;         /* 좌우 꽉 차게 설정 */
+            bottom: 25px;           /* 바닥에서 띄움 */
+            left: 50%;
+            transform: translateX(-50%);
             
-            padding: 20px 0;
-            background: rgba(255, 255, 255, 0.95); /* 가독성을 위한 불투명 배경 */
-            backdrop-filter: blur(10px);           /* 세련된 배경 흐림 효과 */
-            border-top: 1px solid #eee;
-            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05); /* 위쪽으로 은은한 그림자 */
+            width: 90%;
+            max-width: 400px;
+            padding: 15px 20px;
+            
+            /* 디자인 포인트: 원형 테두리와 입체감 */
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 100px;   /* 완전한 원형 테두리 */
+            border: 2px solid #eee; /* 굵은 테두리로 시인성 확보 */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             
             text-align: center;
             z-index: 1000;
+            pointer-events: none;   /* 푸터 자체는 클릭 방해 안되게 설정 가능 */
         }
 
         .reward-footer p {
@@ -92,6 +109,15 @@
                 font-size: 1rem;
                 padding: 4px 10px;
             }
+            .content-wrapper {
+                /* 모바일에서는 푸터가 더 커질 수 있으므로 여백을 충분히 줍니다 */
+                padding-bottom: 100px !important;
+                justify-content: flex-start; /* 인원이 많으면 상단부터 정렬 */
+                padding-top: 40px;
+            }
+            .reward-footer-fixed {
+                height: 70px;
+            }
         }
         .reward-footer span {
             color: #ff4757; /* 강조색 */
@@ -113,11 +139,13 @@
             </div>
         </div>
     </div>
-    <section class="participant-section">
-        <h3>📢 참여해주신 분들</h3>
-        <div id="participant-list" class="participant-grid">
-            </div>
-    </section>
+    <div class="content-wrapper">
+        <section class="participant-section">
+            <h3>📢 참여해주신 분들</h3>
+            <div id="participant-list" class="participant-grid">
+                </div>
+        </section>
+    </div>
     <footer class="reward-footer">
         <p>🎁 당첨 보상 : <span>솔 에르다 조각 3개</span></p>
     </footer>
