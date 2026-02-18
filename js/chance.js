@@ -54,15 +54,11 @@ export function shareToKakao(stateMembers) {
     const currentPath = window.location.pathname;
     const dirPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
     
-    const relativePath = `${dirPath}/post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}`;
-
+    const finalUrl = `${dirPath}/post.html?w1=${encodeURIComponent(winner1)}&w2=${encodeURIComponent(winner2)}&p=${encodeURIComponent(participantsStr)}`;
     Kakao.Share.sendCustom({
         templateId: 129560,
         templateArgs: {
-            'url': relativePath,
-            'p': participantsStr,
-            'title': '💎 Selen 길드 수로 추첨 결과',
-            'desc': `총 ${checkedNames.length}명이 참여했습니다!`
+            'url': finalUrl
         },
     });
 }

@@ -1,35 +1,48 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const winners = [params.get('w1'), params.get('w2')];
-    const participantsRaw = params.get('p'); // 참여자 명단 파라미터
+// js/post.js
 
-    if (!winners[0] || !participantsRaw) {
-        alert("잘못된 접근입니다. 메인 페이지를 통해 공유해 주세요.");
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    
+    // 1. 파라미터 추출
+    const winner1 = params.get('w1');
+    const winner2 = params.get('w2');
+    const pParam = params.get('p'); // 명단 데이터
+
+    // 2. 디버깅 로그 (브라우저 F12 콘솔에서 확인용)
+    console.log("추출된 참여자 명단 문자열:", pParam);
+
+    if (pParam) {
+        // 쉼표로 분리하여 배열로 복원
+        const participants = pParam.split(',').map(name => name.trim());
+        
+        // 3. 화면에 명단 렌더링 함수 호출
+        renderParticipantList(participants, [winner1, winner2]);
+        
+        // 4. 슬롯 애니메이션 실행
+        startSlotSlide("slot1-rail", winner1, participants);
+        setTimeout(() => {
+            startSlotSlide("slot2-rail", winner2, participants);
+        }, 800);
+    } else {
+        console.error("URL에 참여자 명단(p)이 없습니다.");
+        const container = document.getElementById('participant-list');
+        if (container) container.innerHTML = "<p>참여자 정보를 불러올 수 없습니다.</p>";
+    }
+});
+
+function renderParticipantList(names, winners) {
+    const container = document.getElementById('participant-list');
+    if (!container) {
+        console.error("ID가 'participant-list'인 요소를 찾을 수 없습니다.");
         return;
     }
 
-    // 쉼표로 구분된 참여자 명단을 배열로 변환
-    const participants = participantsRaw.split(',');
-
-    // 1. 참여자 명단 하단에 렌더링
-    renderParticipantList(participants, winners);
-
-    // 2. 슬롯 애니메이션 실행 (참여자 명단을 애니메이션 소스로 활용하여 몰입감 증대)
-    startSlotSlide("slot1-rail", winners[0], participants);
-    setTimeout(() => {
-        startSlotSlide("slot2-rail", winners[1], participants);
-    }, 800);
-});
-function renderParticipantList(names, winners) {
-    const container = document.getElementById('participant-list');
-    if (!container) return;
-
+    // 명단 생성
     container.innerHTML = names.map(name => {
         const isWinner = winners.includes(name);
         return `<span class="participant-badge ${isWinner ? 'is-winner' : ''}">${name}</span>`;
     }).join('');
 }
-
 function startSlotSlide(railId, winner, namePool) {
     const rail = document.getElementById(railId);
     const slotElement = rail.parentElement;
