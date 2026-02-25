@@ -17,39 +17,32 @@ let state = {
 
 // 1. 초기 로드 및 데이터 병합
 async function init() {
-    const localData = localStorage.getItem('guild_members');
-    
-    if (localData) {
-        // 로컬 저장소에 편집 데이터가 있으면 우선 사용 (체크 상태 포함)
-        state.members = JSON.parse(localData);
-        console.log("💾 로컬 저장소 데이터를 로드했습니다.");
-    } else {
-        // 처음 접속 시: member.json과 soldier.json을 병합
-        try {
-            const [memberRes, soldierRes] = await Promise.all([
-                fetch('./assets/member.json'),
-                fetch('./assets/soldier.json')
-            ]);
+    try {
+        // 1. 전체 명단만 가져옵니다.
+        const response = await fetch(`./assets/member.json?v=${Date.now()}`);
+        const serverMembers = await response.json();
 
-            const allNames = await memberRes.json();     // 전체 명단
-            const activeSoldiers = await soldierRes.json(); // 체크될 명단
-            
-            // 비교를 위해 soldier 이름을 Set으로 변환 (검색 최적화)
-            const soldierSet = new Set(activeSoldiers.map(s => s.name));
+        const localData = localStorage.getItem('guild_members');
+        let currentCheckedMap = new Map();
 
-            // 전체 명단을 돌면서 soldier에 이름이 있으면 checked: true 부여
-            state.members = allNames.map(m => ({
-                name: m.name,
-                checked: soldierSet.has(m.name) 
-            }));
-
-            // 초기 상태 저장
-            localStorage.setItem('guild_members', JSON.stringify(state.members));
-            console.log("📂 JSON 파일 병합 완료: soldier.json 명단을 자동 체크했습니다.");
-
-        } catch (error) {
-            console.error("데이터 로드 실패:", error);
+        if (localData) {
+            const parsedLocal = JSON.parse(localData);
+            parsedLocal.forEach(m => currentCheckedMap.set(m.name, m.checked));
         }
+
+        // 2. 서버 명단을 기준으로 상태를 재구성합니다.
+        // 파일에서 사라진 사람은 자연스럽게 삭제되고, 남은 사람의 체크 상태는 유지됩니다.
+        state.members = serverMembers.map(m => ({
+            name: m.name,
+            // 새로 추가된 사람은 기본적으로 체크 상태(true)로 설정하거나 false로 설정 가능
+            checked: currentCheckedMap.has(m.name) ? currentCheckedMap.get(m.name) : true
+        }));
+
+        setState(state.members);
+        console.log("✅ member.json 기반 명단 통합 완료");
+
+    } catch (error) {
+        console.error("데이터 초기화 실패:", error);
     }
     render();
 }
