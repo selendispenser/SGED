@@ -147,27 +147,41 @@ if (btnSelectAll) {
 /**
  * soldier.json 데이터를 가져와 현재 리스트의 체크 상태만 갱신하는 함수
  */
+/**
+ * 서버의 member.json 데이터를 불러와 로컬 리스트를 완전히 최신화(덮어쓰기)하는 함수
+ */
 async function handleLoadSoldiers() {
     try {
-        const res = await fetch('./assets/soldier.json');
-        const activeSoldiers = await res.json();
-        
-        // 검색 최적화를 위해 Set 생성
-        const soldierSet = new Set(activeSoldiers.map(s => s.name));
+        // 1. 사용자에게 데이터 초기화 확인 (기존 편집 내용이 사라지므로 권장)
+        if (!confirm("서버의 최신 명단으로 초기화하시겠습니까?\n(직접 추가한 인원이나 현재 체크 상태가 모두 초기화됩니다.)")) {
+            return;
+        }
 
-        // 현재 리스트(state.members)를 유지하면서 체크 상태만 업데이트
-        const updatedMembers = state.members.map(m => ({
-            ...m,
-            checked: soldierSet.has(m.name)
+        // 2. 서버에서 최신 member.json 가져오기 (캐시 방지 파라미터 포함)
+        const res = await fetch(`./assets/member.json?v=${Date.now()}`);
+        const freshMembers = await res.json();
+
+        if (!freshMembers || freshMembers.length === 0) {
+            throw new Error("데이터가 비어있습니다.");
+        }
+
+        // 3. 서버 데이터를 기반으로 새로운 state 생성
+        // 불러오기 시 기본적으로 모든 인원을 체크 상태(true)로 할지, 
+        // 혹은 false로 할지 선택할 수 있습니다. 여기서는 true로 설정합니다.
+        const updatedMembers = freshMembers.map(m => ({
+            name: m.name,
+            checked: true 
         }));
 
-        // 상태 반영 및 로컬 저장소 저장
+        // 4. 상태 반영 및 로컬 저장소 강제 갱신
         setState(updatedMembers);
-        console.log("📥 수로 참여 명단을 기반으로 체크 상태를 동기화했습니다.");
+        
+        console.log("♻️ 서버 명단(member.json)을 기준으로 로컬 데이터를 동기화했습니다.");
+        alert("최신 명단으로 초기화되었습니다.");
 
     } catch (error) {
-        console.error("참여 인원 불러오기 실패:", error);
-        alert("데이터를 불러오는 중 오류가 발생했습니다.");
+        console.error("명단 불러오기 실패:", error);
+        alert("최신 명단을 불러오는 중 오류가 발생했습니다.");
     }
 }
 
