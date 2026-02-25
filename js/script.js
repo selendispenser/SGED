@@ -170,7 +170,7 @@ async function handleLoadSoldiers() {
         // 혹은 false로 할지 선택할 수 있습니다. 여기서는 true로 설정합니다.
         const updatedMembers = freshMembers.map(m => ({
             name: m.name,
-            checked: true 
+            checked: false
         }));
 
         // 4. 상태 반영 및 로컬 저장소 강제 갱신
