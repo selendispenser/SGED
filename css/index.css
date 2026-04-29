@@ -325,16 +325,18 @@ header h1 {
     box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
 }
 
-/* 사이트 전체 텍스트 선택 및 드래그 방지 */
-*, *::before, *::after {
-    -webkit-user-select: none;  /* Safari, Chrome */
-    -moz-user-select: none;     /* Firefox */
-    -ms-user-select: none;      /* IE/Edge */
-    user-select: none;          /* 표준 속성 */
-    
-    /* 모바일에서 길게 터치 시 돋보기나 복사 메뉴 방지 */
+/* 인터랙션 영역에서만 텍스트 선택/드래그 방지 (UI 오작동 예방) */
+.member-list,
+.action-bar,
+.controls,
+.slot-container,
+.participant-section {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     -webkit-touch-callout: none;
-    -webkit-user-drag: none;    /* 이미지 드래그 방지 */
+    -webkit-user-drag: none;
 }
 
 /* 입력창(input)은 예외적으로 텍스트 입력 및 선택이 가능해야 함 */

@@ -4,11 +4,10 @@ import * as Chance from './chance.js';
 const KAKAO_APP_KEY = '9693a2be8ecf395d39691e85a32bc174'; 
 if (window.Kakao) {
     if (!Kakao.isInitialized()) {
-        Kakao.init(KAKAO_APP_KEY); 
-        console.log("✅ 카카오 SDK 초기화 완료:", Kakao.isInitialized());
+        Kakao.init(KAKAO_APP_KEY);
     }
 } else {
-    console.error("❌ 카카오 SDK 스크립트가 로드되지 않았습니다.");
+    console.error("카카오 SDK 스크립트가 로드되지 않았습니다.");
 }
 
 let state = {
@@ -39,7 +38,6 @@ async function init() {
         }));
 
         setState(state.members);
-        console.log("✅ member.json 기반 명단 통합 완료");
 
     } catch (error) {
         console.error("데이터 초기화 실패:", error);
@@ -102,7 +100,9 @@ function handleToggle(name) {
 
 // 이벤트 바인딩
 document.getElementById('btnAddMember').addEventListener('click', handleAdd);
-memberInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAdd(); });
+document.getElementById('memberInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAdd();
+});
 document.addEventListener('DOMContentLoaded', init);
 
 /**
@@ -117,7 +117,6 @@ function handleAllUncheck() {
     
     // 변경된 상태를 적용 (저장 및 리렌더링 자동 수행)
     setState(resetMembers);
-    console.log("🔓 모든 인원의 체크가 해제되었습니다.");
 }
 
 // 기존 btnReset 버튼에 이벤트 연결
@@ -135,7 +134,6 @@ function handleAllCheck() {
     
     // 변경된 상태 적용 및 저장
     setState(allCheckedMembers);
-    console.log("✅ 모든 인원이 선택되었습니다.");
 }
 
 // 이벤트 바인딩 영역에 추가
@@ -144,9 +142,6 @@ if (btnSelectAll) {
     btnSelectAll.addEventListener('click', handleAllCheck);
 }
 
-/**
- * soldier.json 데이터를 가져와 현재 리스트의 체크 상태만 갱신하는 함수
- */
 /**
  * 서버의 member.json 데이터를 불러와 로컬 리스트를 완전히 최신화(덮어쓰기)하는 함수
  */
@@ -175,8 +170,6 @@ async function handleLoadSoldiers() {
 
         // 4. 상태 반영 및 로컬 저장소 강제 갱신
         setState(updatedMembers);
-        
-        console.log("♻️ 서버 명단(member.json)을 기준으로 로컬 데이터를 동기화했습니다.");
         alert("최신 명단으로 초기화되었습니다.");
 
     } catch (error) {
