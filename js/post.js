@@ -1,34 +1,70 @@
 // js/post.js
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
-    
-    // 1. 파라미터 추출
+
+    // 1. 당첨자
     const winner1 = params.get('w1');
     const winner2 = params.get('w2');
-    const pParam = params.get('p'); // 명단 데이터
 
-    // 2. 디버깅 로그 (브라우저 F12 콘솔에서 확인용)
-    console.log("추출된 참여자 명단 문자열:", pParam);
+    // 2. 참여자 복원
+    //    - 신규 포맷: i = member.json 인덱스(. 구분), c = 직접 추가된 이름(, 구분)
+    //    - 구버전 포맷(p=name1,name2,...) 도 호환 유지
+    const participants = await resolveParticipants(params);
 
-    if (pParam) {
-        // 쉼표로 분리하여 배열로 복원
-        const participants = pParam.split(',').map(name => name.trim());
-        
-        // 3. 화면에 명단 렌더링 함수 호출
-        renderParticipantList(participants, [winner1, winner2]);
-        
-        // 4. 슬롯 애니메이션 실행
-        startSlotSlide("slot1-rail", winner1, participants);
-        setTimeout(() => {
-            startSlotSlide("slot2-rail", winner2, participants);
-        }, 800);
-    } else {
-        console.error("URL에 참여자 명단(p)이 없습니다.");
+    if (participants.length === 0) {
+        console.error("참여자 명단을 복원할 수 없습니다.");
         const container = document.getElementById('participant-list');
-        if (container) container.innerHTML = "<p>참여자 정보를 불러올 수 없습니다.</p>";
+        if (container) {
+            const msg = document.createElement('p');
+            msg.textContent = "참여자 정보를 불러올 수 없습니다.";
+            container.replaceChildren(msg);
+        }
+        return;
     }
+
+    renderParticipantList(participants, [winner1, winner2]);
+
+    startSlotSlide("slot1-rail", winner1, participants);
+    setTimeout(() => {
+        startSlotSlide("slot2-rail", winner2, participants);
+    }, 800);
 });
+
+async function resolveParticipants(params) {
+    const iParam = params.get('i');
+    const cParam = params.get('c');
+
+    if (iParam || cParam) {
+        const result = [];
+        if (iParam) {
+            try {
+                const res = await fetch(`./assets/member.json?v=${Date.now()}`);
+                const baseNames = (await res.json()).map(m => m.name);
+                for (const token of iParam.split('.')) {
+                    const idx = parseInt(token, 10);
+                    if (Number.isInteger(idx) && baseNames[idx] != null) {
+                        result.push(baseNames[idx]);
+                    }
+                }
+            } catch (err) {
+                console.error("member.json 로드 실패:", err);
+            }
+        }
+        if (cParam) {
+            for (const name of cParam.split(',')) {
+                const trimmed = name.trim();
+                if (trimmed) result.push(trimmed);
+            }
+        }
+        return result;
+    }
+
+    // 구버전 호환: p=이름1,이름2,...
+    const pParam = params.get('p');
+    if (!pParam) return [];
+    return pParam.split(',').map(n => n.trim()).filter(Boolean);
+}
 
 function renderParticipantList(names, winners) {
     const container = document.getElementById('participant-list');
@@ -37,11 +73,16 @@ function renderParticipantList(names, winners) {
         return;
     }
 
-    // 명단 생성
-    container.innerHTML = names.map(name => {
-        const isWinner = winners.includes(name);
-        return `<span class="participant-badge ${isWinner ? 'is-winner' : ''}">${name}</span>`;
-    }).join('');
+    const winnerSet = new Set(winners);
+    container.replaceChildren();
+    for (const name of names) {
+        const badge = document.createElement('span');
+        badge.className = winnerSet.has(name)
+            ? 'participant-badge is-winner'
+            : 'participant-badge';
+        badge.textContent = name;
+        container.appendChild(badge);
+    }
 }
 function startSlotSlide(railId, winner, namePool) {
     const rail = document.getElementById(railId);
@@ -55,11 +96,16 @@ function startSlotSlide(railId, winner, namePool) {
     }
     displayList.push(winner); // 마지막에 당첨자 배치
 
-    // 2. HTML 생성 (마지막 요소에만 클래스를 넣기 쉽게 id 부여 가능)
-    rail.innerHTML = displayList.map((name, index) => {
+    // 2. DOM 노드 생성 (이름은 textContent로 안전하게 주입)
+    rail.replaceChildren();
+    displayList.forEach((name, index) => {
+        const item = document.createElement('div');
         const isLast = index === displayList.length - 1;
-        return `<div class="name-item ${isLast ? 'target-winner' : ''}" style="height: ${itemHeight}px;">${name}</div>`;
-    }).join('');
+        item.className = isLast ? 'name-item target-winner' : 'name-item';
+        item.style.height = `${itemHeight}px`;
+        item.textContent = name;
+        rail.appendChild(item);
+    });
 
     // 3. 애니메이션 완료 후 하이라이트 실행 (transitionend 이벤트 활용)
     rail.addEventListener('transitionend', () => {

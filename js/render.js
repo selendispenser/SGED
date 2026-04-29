@@ -4,16 +4,31 @@
 export function createMemberElement(name, isChecked, onDelete, onToggle) {
     const li = document.createElement('li');
     li.className = 'member-item';
-    li.innerHTML = `
-        <div class="member-info">
-            <input type="checkbox" class="member-checkbox" ${isChecked ? 'checked' : ''}>
-            <span class="name-text">${name}</span>
-        </div>
-        <button class="delete-btn">&times;</button>
-    `;
+
+    const info = document.createElement('div');
+    info.className = 'member-info';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'member-checkbox';
+    checkbox.checked = isChecked;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name-text';
+    nameSpan.textContent = name;
+
+    info.append(checkbox, nameSpan);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.setAttribute('aria-label', `${name} 삭제`);
+    deleteBtn.textContent = '×';
+
+    li.append(info, deleteBtn);
 
     // 이벤트 리스너: 삭제 버튼
-    li.querySelector('.delete-btn').addEventListener('click', (e) => {
+    deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         onDelete(name);
     });
