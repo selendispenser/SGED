@@ -1,3 +1,6 @@
+import { showToast } from './toast.js';
+import { fingerprint } from './fingerprint.js';
+
 // Fisher–Yates 셔플: 모든 순열이 균등 확률로 나오도록 보장
 function shuffle(arr) {
     const a = [...arr];
@@ -10,13 +13,16 @@ function shuffle(arr) {
 
 // 카카오톡 공유 로직
 export async function shareToKakao(stateMembers) {
-    if (!window.Kakao) return;
+    if (!window.Kakao) {
+        showToast("카카오 SDK 로드 실패. 공유할 수 없습니다.", { type: 'error' });
+        return;
+    }
 
     // 1. 체크된 멤버 이름만 추출
     const checkedNames = stateMembers.filter(m => m.checked).map(m => m.name);
 
     if (checkedNames.length < 2) {
-        alert("추첨 인원이 부족합니다.");
+        showToast("추첨 인원이 부족합니다. (2명 이상 선택 필요)", { type: 'error' });
         return;
     }
 
@@ -45,7 +51,11 @@ export async function shareToKakao(stateMembers) {
     const params = new URLSearchParams();
     params.set('w1', winner1);
     params.set('w2', winner2);
-    if (indices.length) params.set('i', indices.join('.'));
+    if (indices.length) {
+        params.set('i', indices.join('.'));
+        // 송신 시점의 member.json 지문 → 수신 측에서 mismatch 감지에 사용
+        params.set('f', fingerprint(baseNames));
+    }
     if (customs.length) params.set('c', customs.join(','));
 
     const dirPath = window.location.pathname.replace(/\/[^/]*$/, '');

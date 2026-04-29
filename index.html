@@ -18,30 +18,31 @@
     <div id="app">
         <header>
             <h1>Selen 수로 참여 체크</h1>
-            <p id="counter">선택된 인원: 0명</p>
+            <p id="counter" aria-live="polite" aria-atomic="true">선택된 인원: 0명</p>
             <p id="date">2026.04.19 기준</p>
         </header>
 
-        <section class="controls">
+        <section class="controls" aria-label="명단 조작">
             <div class="add-container">
+                <label for="memberInput" class="visually-hidden">추가할 길드원 이름</label>
                 <input type="text" id="memberInput" class="search-input" placeholder="추가할 길드원 이름 입력...">
-                <button id="btnAddMember" class="add-btn">추가</button>
+                <button type="button" id="btnAddMember" class="add-btn">추가</button>
             </div>
             <div class="filter-buttons">
-                <button id="btnLoadSoldiers" class="secondary-btn">명단 최신화</button>
-                <button id="btnSelectAll" class="secondary-btn">전체 선택</button>
-                <button id="btnReset" class="secondary-btn">전체 해제</button>
+                <button type="button" id="btnLoadSoldiers" class="secondary-btn">명단 최신화</button>
+                <button type="button" id="btnSelectAll" class="secondary-btn">전체 선택</button>
+                <button type="button" id="btnReset" class="secondary-btn">전체 해제</button>
             </div>
         </section>
 
         <main class="list-container">
-            <ul id="memberList" class="member-list">
+            <ul id="memberList" class="member-list" aria-label="길드원 명단">
                 <li class="loading-state">데이터를 불러오는 중입니다...</li>
             </ul>
         </main>
 
         <footer class="action-bar">
-            <button id="btnSendKakao" class="primary-btn">
+            <button type="button" id="btnSendKakao" class="primary-btn">
                 <span>카카오톡으로 결과 공유</span>
             </button>
         </footer>

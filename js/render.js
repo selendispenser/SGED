@@ -27,14 +27,21 @@ export function createMemberElement(name, isChecked, onDelete, onToggle) {
 
     li.append(info, deleteBtn);
 
-    // 이벤트 리스너: 삭제 버튼
+    // 토글의 단일 권위: 체크박스의 change 이벤트
+    // (마우스 클릭, Tab+Space 키보드 입력 모두 change 이벤트를 발생시킴)
+    checkbox.addEventListener('change', () => onToggle(name));
+
+    // 삭제 버튼 — li로의 버블링 차단
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         onDelete(name);
     });
 
-    // 이벤트 리스너: 전체 클릭 (토글)
-    li.addEventListener('click', () => onToggle(name));
+    // li 빈 영역 클릭 시 체크박스로 위임 → change 이벤트 단일 흐름
+    li.addEventListener('click', (e) => {
+        if (e.target === checkbox) return; // 체크박스 직접 클릭은 자체 처리
+        checkbox.click();
+    });
 
     return li;
 }
