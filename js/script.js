@@ -215,24 +215,92 @@ if (btnLoadSoldiers) {
 
 /**
  * 붙여넣은 텍스트에서 이름 목록을 추출합니다.
- * 각 줄의 첫 번째 공백 기준 토큰만 이름으로 취급 → 뒤따르는 카운터 숫자는 무시됩니다.
- * (닉네임에 공백이 없다는 전제. 이름 내부 숫자는 공백이 없어 그대로 유지됩니다.)
+ * 줄바꿈·공백 어느 것으로 구분되든 토큰을 모두 이름으로 취급합니다.
+ * (닉네임에 공백이 없다는 전제.) 순수 숫자 토큰은 카운터로 보고 무시합니다.
  */
 function parseRosterText(text) {
     const names = [];
     const seen = new Set();
     for (const line of text.split(/\r?\n/)) {
-        const name = line.trim().split(/\s+/)[0];
-        if (!name || seen.has(name)) continue;
-        seen.add(name);
-        names.push(name);
+        for (const token of line.trim().split(/\s+/)) {
+            if (!token || /^\d+$/.test(token) || seen.has(token)) continue;
+            seen.add(token);
+            names.push(token);
+        }
     }
     return names;
 }
 
+// 자모 1개 차이까지는 확신 있는 오타로 보고 자동 교정, 2개 차이는 추천만.
+const TYPO_AUTO_MAX = 1;
+const TYPO_SUGGEST_MAX = 2;
+
+/**
+ * 문자열을 자모 토큰 배열로 분해합니다.
+ * 한글 음절은 초/중/종성으로 나누고(종성 없으면 생략), 그 외 문자는 그대로 한 토큰으로 둡니다.
+ * 편집 거리 비교용이라 실제 자모 문자 대신 구분 가능한 식별자('L#','V#','T#')를 사용합니다.
+ */
+function decomposeToTokens(str) {
+    const tokens = [];
+    for (const ch of str) {
+        const code = ch.codePointAt(0);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+            const s = code - 0xAC00;
+            const initial = Math.floor(s / (21 * 28));
+            const medial = Math.floor((s % (21 * 28)) / 28);
+            const final = s % 28;
+            tokens.push('L' + initial, 'V' + medial);
+            if (final > 0) tokens.push('T' + final);
+        } else {
+            tokens.push(ch);
+        }
+    }
+    return tokens;
+}
+
+/** 두 토큰 배열 사이의 편집 거리(자모 개수 차이) */
+function tokenDistance(a, b) {
+    const m = a.length, n = b.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    let prev = Array.from({ length: n + 1 }, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+        const cur = [i];
+        for (let j = 1; j <= n; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        }
+        prev = cur;
+    }
+    return prev[n];
+}
+
+/**
+ * 붙여넣은 이름과 가장 가까운 기존 멤버(들)를 찾습니다.
+ * @returns {{ distance: number, matches: string[] }} 최소 거리와 그 거리의 후보 이름 목록
+ */
+function findSimilarMembers(nameTokens, memberTokensList) {
+    let distance = Infinity;
+    let matches = [];
+    for (const m of memberTokensList) {
+        const d = tokenDistance(nameTokens, m.tokens);
+        if (d < distance) {
+            distance = d;
+            matches = [m.name];
+        } else if (d === distance) {
+            matches.push(m.name);
+        }
+    }
+    return { distance, matches };
+}
+
 /**
  * 붙여넣은 명단으로 전체 동기화합니다.
- * 명단에 있으면 체크, 없으면 해제. 명단에 없던 신규 인원은 추가 후 체크합니다.
+ * - 정확히 일치: 체크
+ * - 자모 1개 차이(후보 1명): 오타로 보고 그 기존 멤버 자동 체크
+ * - 자모 2개 차이 또는 후보가 여럿: 추천만 표시(자동 처리 안 함)
+ * - 닮은 이름 없음: 신규 인원으로 추가 후 체크
+ * 붙여넣은 명단에 없는(그리고 자동 매칭되지 않은) 기존 인원은 체크 해제됩니다.
  */
 function handleApplyRoster() {
     const input = document.getElementById('rosterInput');
@@ -241,24 +309,44 @@ function handleApplyRoster() {
         showToast("붙여넣은 명단에서 이름을 찾지 못했습니다.", { type: 'error' });
         return;
     }
-    const nameSet = new Set(names);
 
-    // 1) 명단에 없던 신규 인원 추가 (state + DOM)
-    const existing = new Set(state.members.map(m => m.name));
-    const added = [];
-    const listElement = document.getElementById('memberList');
+    const existingSet = new Set(state.members.map(m => m.name));
+    const memberTokensList = state.members.map(m => ({ name: m.name, tokens: decomposeToTokens(m.name) }));
+
+    const checkedTargets = new Set(); // 최종적으로 체크할 기존/신규 이름
+    const autoMatched = [];           // { from, to } 자모 1개 오타 자동 교정
+    const suggestions = [];           // { from, candidates } 확인 필요
+    const toAdd = [];                 // 신규 인원 이름
+
     for (const name of names) {
-        if (existing.has(name)) continue;
+        if (existingSet.has(name)) {
+            checkedTargets.add(name);
+            continue;
+        }
+        const { distance, matches } = findSimilarMembers(decomposeToTokens(name), memberTokensList);
+        if (distance <= TYPO_AUTO_MAX && matches.length === 1) {
+            autoMatched.push({ from: name, to: matches[0] });
+            checkedTargets.add(matches[0]);
+        } else if (distance <= TYPO_SUGGEST_MAX) {
+            suggestions.push({ from: name, candidates: matches });
+        } else {
+            toAdd.push(name);
+        }
+    }
+
+    // 신규 인원 추가 (state + DOM)
+    const listElement = document.getElementById('memberList');
+    for (const name of toAdd) {
         state.members.push({ name, checked: true });
         const el = Render.createMemberElement(name, true, handleDelete, handleToggle);
         elementsByName.set(name, el);
         listElement.appendChild(el);
-        added.push(name);
+        checkedTargets.add(name);
     }
 
-    // 2) 전체 동기화: 붙여넣은 명단에 있으면 체크, 없으면 해제
+    // 전체 동기화: checkedTargets에 있으면 체크, 없으면 해제
     for (const m of state.members) {
-        const shouldCheck = nameSet.has(m.name);
+        const shouldCheck = checkedTargets.has(m.name);
         m.checked = shouldCheck;
         const cb = elementsByName.get(m.name)?.querySelector('.member-checkbox');
         if (cb) cb.checked = shouldCheck;
@@ -267,9 +355,43 @@ function handleApplyRoster() {
     persist();
     refreshCounter();
 
-    let msg = `${names.length}명 체크 완료.`;
-    if (added.length) msg += ` 신규 ${added.length}명 추가: ${added.join(', ')}`;
-    showToast(msg, { type: 'success' });
+    renderRosterResult({ autoMatched, suggestions, added: toAdd, checkedCount: checkedTargets.size });
+}
+
+/** 붙여넣기 처리 결과(체크 수, 오타 교정, 확인 필요, 신규 추가)를 결과 블록에 표시 */
+function renderRosterResult({ autoMatched, suggestions, added, checkedCount }) {
+    const box = document.getElementById('rosterResult');
+    if (!box) return;
+    box.replaceChildren();
+
+    const summary = document.createElement('p');
+    summary.className = 'roster-result-summary';
+    summary.textContent = `${checkedCount}명 체크 완료.`;
+    box.appendChild(summary);
+
+    const addSection = (className, heading, items, format) => {
+        if (items.length === 0) return;
+        const sec = document.createElement('div');
+        sec.className = `roster-result-section ${className}`;
+        const h = document.createElement('strong');
+        h.textContent = heading;
+        sec.appendChild(h);
+        const ul = document.createElement('ul');
+        for (const item of items) {
+            const li = document.createElement('li');
+            li.textContent = format(item);
+            ul.appendChild(li);
+        }
+        sec.appendChild(ul);
+        box.appendChild(sec);
+    };
+
+    addSection('roster-auto', '오타 자동 교정', autoMatched, ({ from, to }) => `${from} → ${to}`);
+    addSection('roster-suggest', '확인 필요 (비슷한 이름 있음)', suggestions,
+        ({ from, candidates }) => `${from} → 혹시 ${candidates.join(', ')}?`);
+    addSection('roster-added', `신규 추가 ${added.length}명`, added, (name) => name);
+
+    box.hidden = false;
 }
 
 const btnApplyRoster = document.getElementById('btnApplyRoster');

@@ -173,6 +173,48 @@ header h1 {
     border-radius: 12px;
 }
 
+.roster-result {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.roster-result-summary {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.roster-result-section {
+    margin-top: 8px;
+}
+
+.roster-result-section strong {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+
+.roster-result-section ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.roster-result-section li {
+    padding: 1px 0;
+}
+
+.roster-suggest strong {
+    color: var(--accent-color);
+}
+
+.roster-added strong {
+    color: var(--text-sub);
+}
+
 /* 4. Main List Section */
 .list-container {
     width: 100%;
