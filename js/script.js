@@ -213,6 +213,70 @@ if (btnLoadSoldiers) {
     btnLoadSoldiers.addEventListener('click', handleLoadSoldiers);
 }
 
+/**
+ * 붙여넣은 텍스트에서 이름 목록을 추출합니다.
+ * 각 줄의 첫 번째 공백 기준 토큰만 이름으로 취급 → 뒤따르는 카운터 숫자는 무시됩니다.
+ * (닉네임에 공백이 없다는 전제. 이름 내부 숫자는 공백이 없어 그대로 유지됩니다.)
+ */
+function parseRosterText(text) {
+    const names = [];
+    const seen = new Set();
+    for (const line of text.split(/\r?\n/)) {
+        const name = line.trim().split(/\s+/)[0];
+        if (!name || seen.has(name)) continue;
+        seen.add(name);
+        names.push(name);
+    }
+    return names;
+}
+
+/**
+ * 붙여넣은 명단으로 전체 동기화합니다.
+ * 명단에 있으면 체크, 없으면 해제. 명단에 없던 신규 인원은 추가 후 체크합니다.
+ */
+function handleApplyRoster() {
+    const input = document.getElementById('rosterInput');
+    const names = parseRosterText(input.value);
+    if (names.length === 0) {
+        showToast("붙여넣은 명단에서 이름을 찾지 못했습니다.", { type: 'error' });
+        return;
+    }
+    const nameSet = new Set(names);
+
+    // 1) 명단에 없던 신규 인원 추가 (state + DOM)
+    const existing = new Set(state.members.map(m => m.name));
+    const added = [];
+    const listElement = document.getElementById('memberList');
+    for (const name of names) {
+        if (existing.has(name)) continue;
+        state.members.push({ name, checked: true });
+        const el = Render.createMemberElement(name, true, handleDelete, handleToggle);
+        elementsByName.set(name, el);
+        listElement.appendChild(el);
+        added.push(name);
+    }
+
+    // 2) 전체 동기화: 붙여넣은 명단에 있으면 체크, 없으면 해제
+    for (const m of state.members) {
+        const shouldCheck = nameSet.has(m.name);
+        m.checked = shouldCheck;
+        const cb = elementsByName.get(m.name)?.querySelector('.member-checkbox');
+        if (cb) cb.checked = shouldCheck;
+    }
+
+    persist();
+    refreshCounter();
+
+    let msg = `${names.length}명 체크 완료.`;
+    if (added.length) msg += ` 신규 ${added.length}명 추가: ${added.join(', ')}`;
+    showToast(msg, { type: 'success' });
+}
+
+const btnApplyRoster = document.getElementById('btnApplyRoster');
+if (btnApplyRoster) {
+    btnApplyRoster.addEventListener('click', handleApplyRoster);
+}
+
 const btnSendKakao = document.getElementById('btnSendKakao');
 if (btnSendKakao) {
     if (!kakaoReady) {
