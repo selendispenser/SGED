@@ -1,9 +1,9 @@
 /**
  * 개별 멤버 LI 요소를 생성합니다.
  */
-export function createMemberElement(name, isChecked, onDelete, onToggle) {
+export function createMemberElement(name, isChecked, onDelete, onToggle, isEligible = true) {
     const li = document.createElement('li');
-    li.className = 'member-item';
+    li.className = isEligible ? 'member-item' : 'member-item is-excluded';
 
     const info = document.createElement('div');
     info.className = 'member-info';
@@ -18,6 +18,14 @@ export function createMemberElement(name, isChecked, onDelete, onToggle) {
     nameSpan.textContent = name;
 
     info.append(checkbox, nameSpan);
+
+    // 톡방 명단(talkmem.json)에 없는 인원은 추첨 대상이 아님을 표시
+    if (!isEligible) {
+        const badge = document.createElement('span');
+        badge.className = 'exclude-badge';
+        badge.textContent = '추첨 제외';
+        info.appendChild(badge);
+    }
 
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';

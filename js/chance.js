@@ -12,17 +12,24 @@ function shuffle(arr) {
 }
 
 // 카카오톡 공유 로직
-export async function shareToKakao(stateMembers) {
+export async function shareToKakao(stateMembers, talkmem) {
     if (!window.Kakao) {
         showToast("카카오 SDK 로드 실패. 공유할 수 없습니다.", { type: 'error' });
         return;
     }
 
-    // 1. 체크된 멤버 이름만 추출
-    const checkedNames = stateMembers.filter(m => m.checked).map(m => m.name);
+    if (!talkmem) {
+        showToast("톡방 명단을 불러오지 못해 추첨할 수 없습니다.", { type: 'error' });
+        return;
+    }
+
+    // 1. 체크된 멤버 중 톡방 명단(talkmem.json)에 있는 사람만 추첨 대상
+    const checkedNames = stateMembers
+        .filter(m => m.checked && talkmem.has(m.name))
+        .map(m => m.name);
 
     if (checkedNames.length < 2) {
-        showToast("추첨 인원이 부족합니다. (2명 이상 선택 필요)", { type: 'error' });
+        showToast("추첨 인원이 부족합니다. (톡방 명단 인원 2명 이상 선택 필요)", { type: 'error' });
         return;
     }
 

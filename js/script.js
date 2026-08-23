@@ -12,11 +12,20 @@ if (kakaoReady) {
 
 const state = {
     members: [], // { name: string, checked: boolean }
+    talkmem: null, // Set<string> — 톡방 명단. 로드 실패 시 null
 };
+
+/** 톡방 명단(talkmem.json)에 있어 추첨 대상이 되는 인원인지 */
+function isEligible(name) {
+    // 명단을 못 불러온 상태에서는 UI에 제외 표시를 하지 않는다(추첨 자체는 chance.js가 막음)
+    return state.talkmem === null || state.talkmem.has(name);
+}
 const elementsByName = new Map(); // name -> li element (타겟 업데이트용 인덱스)
 
 // 1. 초기 로드 및 데이터 병합
 async function init() {
+    await loadTalkmem();
+
     try {
         const response = await fetch(`./assets/member.json?v=${Date.now()}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -36,6 +45,20 @@ async function init() {
     } catch (error) {
         console.error("데이터 초기화 실패:", error);
         showLoadError();
+    }
+}
+
+/** 톡방 명단을 불러와 state.talkmem에 Set으로 저장합니다. 실패하면 null로 둡니다. */
+async function loadTalkmem() {
+    try {
+        const res = await fetch(`./assets/talkmem.json?v=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const list = await res.json();
+        state.talkmem = new Set(list.map(m => m.name));
+    } catch (error) {
+        console.error("톡방 명단(talkmem.json) 로드 실패:", error);
+        state.talkmem = null;
+        showToast("톡방 명단을 불러오지 못해 추첨을 진행할 수 없습니다.", { type: 'error', duration: 4500 });
     }
 }
 
@@ -98,7 +121,7 @@ function rebuild(newMembers) {
     elementsByName.clear();
 
     for (const m of state.members) {
-        const el = Render.createMemberElement(m.name, m.checked, handleDelete, handleToggle);
+        const el = Render.createMemberElement(m.name, m.checked, handleDelete, handleToggle, isEligible(m.name));
         elementsByName.set(m.name, el);
         listElement.appendChild(el);
     }
@@ -117,7 +140,7 @@ function handleAdd() {
 
     state.members.push({ name, checked: true });
 
-    const el = Render.createMemberElement(name, true, handleDelete, handleToggle);
+    const el = Render.createMemberElement(name, true, handleDelete, handleToggle, isEligible(name));
     elementsByName.set(name, el);
     document.getElementById('memberList').appendChild(el);
 
@@ -338,7 +361,7 @@ function handleApplyRoster() {
     const listElement = document.getElementById('memberList');
     for (const name of toAdd) {
         state.members.push({ name, checked: true });
-        const el = Render.createMemberElement(name, true, handleDelete, handleToggle);
+        const el = Render.createMemberElement(name, true, handleDelete, handleToggle, isEligible(name));
         elementsByName.set(name, el);
         listElement.appendChild(el);
         checkedTargets.add(name);
@@ -411,8 +434,8 @@ if (btnSendKakao) {
         });
     } else {
         btnSendKakao.addEventListener('click', () => {
-            // 현재 state 객체에 담긴 멤버 리스트를 Chance 모듈로 전달
-            Chance.shareToKakao(state.members);
+            // 현재 state 객체에 담긴 멤버 리스트와 톡방 명단을 Chance 모듈로 전달
+            Chance.shareToKakao(state.members, state.talkmem);
         });
     }
 }
