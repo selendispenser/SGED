@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. 참여자 복원
     //    - 신규 포맷: i = member.json 인덱스(. 구분), c = 직접 추가된 이름(, 구분)
     //    - 구버전 포맷(p=name1,name2,...) 도 호환 유지
-    const participants = await resolveParticipants(params);
+    //    구버전 링크에는 톡방 명단 밖 인원이 섞여 있을 수 있으므로 수신 측에서도 걸러냅니다.
+    const participants = await filterByTalkmem(await resolveParticipants(params));
 
     if (participants.length === 0) {
         console.error("참여자 명단을 복원할 수 없습니다.");
@@ -32,6 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         startSlotSlide("slot2-rail", winner2, participants);
     }, 800);
 });
+
+/**
+ * 톡방 명단(talkmem.json)에 있는 인원만 남깁니다.
+ * 명단을 못 불러오면 필터 없이 그대로 반환합니다(표시 전용 화면이므로 비우지 않음).
+ */
+async function filterByTalkmem(names) {
+    try {
+        const res = await fetch(`./assets/talkmem.json?v=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const talkmem = new Set((await res.json()).map(m => m.name));
+        return names.filter(n => talkmem.has(n));
+    } catch (err) {
+        console.error("톡방 명단(talkmem.json) 로드 실패, 참여자를 그대로 표시합니다:", err);
+        return names;
+    }
+}
 
 async function resolveParticipants(params) {
     const iParam = params.get('i');
